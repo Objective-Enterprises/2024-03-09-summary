@@ -1,8 +1,6 @@
 const http = require('http')
 const url = require('url')
-const PeopleService = require('./service/peopleService')
-
-const peopleService = new PeopleService()
+const { getPersonByIndex, getAllPeople } = require('./handlers/peopleHandlers')
 
 const account = {
   username: 'dorothy',
@@ -21,21 +19,9 @@ const server = http.createServer((request, response) => {
     }
     case '/people': {
       if (parts.query.index) {
-        const person = peopleService.getByIndex(parts.query.index)
-        if (!person) {
-          const message = {
-            message: 'Person not found'
-          }
-          const json = JSON.stringify(message)
-          response.statusCode = 404
-          return response.end(json)
-        }
-        const json = JSON.stringify({ person })
-        return response.end(json)
+        return getPersonByIndex(parts.query.index, response)
       }
-      const people = peopleService.getAll()
-      const json = JSON.stringify(people)
-      return response.end(json)
+      return getAllPeople(response)
     }
     case '/login': {
       let body = ''
