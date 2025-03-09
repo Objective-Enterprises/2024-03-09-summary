@@ -1,6 +1,11 @@
 const http = require('http')
 const url = require('url')
 
+const account = {
+  username: 'dorothy',
+  password: 'parker'
+}
+
 const people = [
   'Dorothy',
   'Tallullah'
@@ -8,6 +13,7 @@ const people = [
 
 const server = http.createServer((request, response) => {
   const parts = url.parse(request.url, true)
+  response.setHeader('Content-Type', 'application/json')
   switch (parts.pathname) {
     case '/hello': {
       return response.end('hello!!!')
@@ -23,6 +29,7 @@ const server = http.createServer((request, response) => {
             message: 'Person not found'
           }
           const json = JSON.stringify(message)
+          response.statusCode = 404
           return response.end(json)
         }
         const json = JSON.stringify({ person })
@@ -31,11 +38,37 @@ const server = http.createServer((request, response) => {
       const json = JSON.stringify(people)
       return response.end(json)
     }
+    case '/login': {
+      let body = ''
+
+      request.on('data', (chunk) => {
+        body += chunk
+      })
+
+      request.on('end', () => {
+        body = JSON.parse(body)
+        if (body.username !== account.username || body.password !== account.password) {
+          response.statusCode = 403
+          const message = {
+            message: 'Invalid login'
+          }
+          const json = JSON.stringify(message)
+          return response.end(json)
+        }
+        const message = {
+          message: 'Successful login'
+        }
+        const json = JSON.stringify(message)
+        return response.end(json)
+      })
+      return
+    }
     default: {
       const message = {
         message: 'Not found'
       }
       const json = JSON.stringify(message)
+      response.statusCode = 404
       return response.end(json)
     }
   }
