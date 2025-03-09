@@ -1,15 +1,13 @@
 const http = require('http')
 const url = require('url')
+const PeopleService = require('./service/peopleService')
+
+const peopleService = new PeopleService()
 
 const account = {
   username: 'dorothy',
   password: 'parker'
 }
-
-const people = [
-  'Dorothy',
-  'Tallullah'
-]
 
 const server = http.createServer((request, response) => {
   const parts = url.parse(request.url, true)
@@ -23,7 +21,7 @@ const server = http.createServer((request, response) => {
     }
     case '/people': {
       if (parts.query.index) {
-        const person = people[parts.query.index]
+        const person = peopleService.getByIndex(parts.query.index)
         if (!person) {
           const message = {
             message: 'Person not found'
@@ -35,6 +33,7 @@ const server = http.createServer((request, response) => {
         const json = JSON.stringify({ person })
         return response.end(json)
       }
+      const people = peopleService.getAll()
       const json = JSON.stringify(people)
       return response.end(json)
     }
